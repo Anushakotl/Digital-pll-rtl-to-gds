@@ -15,22 +15,8 @@ module behavioral_vco #(
 
     real frequency_mhz;
     real half_period_ns;
-
-
-    // =========================================================
+    
     // BEHAVIORAL VCO MODEL
-    // =========================================================
-    //
-    // tuning_word = 0
-    //      -> 25 MHz
-    //
-    // tuning_word = 1023
-    //      -> 50 MHz
-    //
-    // Intermediate codes are linearly interpolated.
-    //
-    // This is SIMULATION-ONLY because of variable #delay.
-    // =========================================================
 
     initial begin
 
@@ -51,26 +37,22 @@ module behavioral_vco #(
 
             else begin
 
-                // ---------------------------------------------
                 // Digital tuning-code to frequency mapping
-                // ---------------------------------------------
 
                 frequency_mhz =
                     FREQ_MIN_MHZ
                     +
                     ((FREQ_MAX_MHZ - FREQ_MIN_MHZ)
-                    * tuning_word / 1023.0);
+                    * tuning_word / 1023.0)
 
-
-                // ---------------------------------------------
+                
                 // For frequency in MHz:
                 //
                 // Period(ns) = 1000 / F(MHz)
                 //
                 // Half period:
-                //
                 // = 500 / F(MHz)
-                // ---------------------------------------------
+                
 
                 half_period_ns =
                     500.0 / frequency_mhz;
