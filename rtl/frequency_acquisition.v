@@ -40,18 +40,6 @@ module frequency_acquisition (
         freq_error;
 
 
-    // =========================================================
-    // COARSE FREQUENCY CORRECTION
-    //
-    // 10 us frequency-detector window:
-    //
-    // one count ≈ 100 kHz feedback error
-    //
-    // VCO / divider sensitivity ≈ 6.11 kHz/code
-    //
-    // therefore about 16 tuning codes/error count.
-    // =========================================================
-
     wire signed [12:0] freq_error_ext;
 
     assign freq_error_ext =
@@ -97,14 +85,6 @@ module frequency_acquisition (
             freq_locked <= 1'b0;
 
         end
-
-
-        // -----------------------------------------------------
-        // When coarse acquisition is inactive, follow the
-        // fine PI tuning word.
-        //
-        // Therefore REACQUIRE begins from the CURRENT VCO code.
-        // -----------------------------------------------------
 
         else if (!enable) begin
 
