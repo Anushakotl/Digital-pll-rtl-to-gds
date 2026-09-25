@@ -39,15 +39,6 @@ module feedback_divider (
 
         else begin
 
-            // Toggle after N/2 input-clock cycles.
-            //
-            // Example:
-            //
-            // divide_value = 4
-            //
-            // N/2 = 2
-            //
-            // toggle every 2 VCO clock cycles
 
             if (div_count >= ((divide_value >> 1) - 1'b1)) begin
 
