@@ -83,14 +83,6 @@ module pll_digital_top (
     );
 
 
-    // =========================================================
-    // PFD
-    //
-    // Kept for debug / architectural visibility.
-    //
-    // Fine phase measurement itself now comes from
-    // phase_error_tdc.
-    // =========================================================
 
     phase_frequency_detector u_pfd (
 
@@ -105,12 +97,6 @@ module pll_digital_top (
         .DOWN    (DOWN)
 
     );
-
-
-    // =========================================================
-    // FINE PHASE TDC
-    // 200 MHz DOMAIN
-    // =========================================================
 
     wire [7:0] tdc_phase_error;
 
@@ -132,13 +118,6 @@ module pll_digital_top (
         .error_valid   (tdc_error_valid)
 
     );
-
-
-    // =========================================================
-    // PHASE CDC
-    //
-    // 200 MHz -> 50 MHz
-    // =========================================================
 
     wire phase_cdc_busy;
 
@@ -162,15 +141,6 @@ module pll_digital_top (
         .src_busy        (phase_cdc_busy)
 
     );
-
-
-    // =========================================================
-    // COARSE FREQUENCY DETECTOR
-    //
-    // 200 MHz domain
-    //
-    // 2000 * 5 ns = 10 us measurement window
-    // =========================================================
 
     wire [7:0] raw_freq_error;
 
@@ -200,13 +170,6 @@ module pll_digital_top (
     );
 
 
-    // =========================================================
-    // FREQUENCY-ERROR CDC
-    //
-    // Frequency measurement occurs only every 10 us,
-    // so the request/acknowledge mailbox has ample time.
-    // =========================================================
-
     wire [7:0] ctrl_freq_error;
 
     wire ctrl_freq_valid;
@@ -235,12 +198,6 @@ module pll_digital_top (
     );
 
 
-    // =========================================================
-    // COARSE FREQUENCY ACQUISITION
-    //
-    // Runs in ctrl_clk domain.
-    // =========================================================
-
     wire [9:0] coarse_tuning_word;
 
     wire freq_locked_internal;
@@ -256,8 +213,6 @@ module pll_digital_top (
 
         .enable           (freq_acquire_enable),
 
-        // While disabled, coarse control follows the
-        // current fine PI code.
         .seed_tuning_word (pi_tuning_word),
 
         .freq_error       (ctrl_freq_error),
@@ -271,14 +226,6 @@ module pll_digital_top (
     );
 
 
-    // =========================================================
-    // COARSE -> FINE PI LOAD
-    //
-    // While ACQUIRE/REACQUIRE is active, once frequency
-    // acquisition declares success, load its tuning code
-    // into the PI before entering TRACK.
-    // =========================================================
-
     wire pi_load_tuning;
 
 
@@ -286,11 +233,6 @@ module pll_digital_top (
         freq_acquire_enable
         &&
         freq_locked_internal;
-
-
-    // =========================================================
-    // FINE PI FILTER
-    // =========================================================
 
     pi_loop_filter u_pi_filter (
 
@@ -320,32 +262,12 @@ module pll_digital_top (
 
     );
 
-
-    // =========================================================
-    // TUNING-WORD MUX
-    //
-    // ACQUIRE / REACQUIRE:
-    //     coarse frequency controller drives VCO
-    //
-    // TRACK / LOCKED / IDLE:
-    //     PI output drives VCO
-    //
-    // The PI load logic makes the transition bumpless.
-    // =========================================================
-
     assign tuning_word =
         freq_acquire_enable
         ?
         coarse_tuning_word
         :
         pi_tuning_word;
-
-
-    // =========================================================
-    // LOCK DETECTOR
-    //
-    // Used only during fine TRACK/LOCKED operation.
-    // =========================================================
 
     lock_detector u_lock_detector (
 
@@ -362,11 +284,6 @@ module pll_digital_top (
         .locked       (locked)
 
     );
-
-
-    // =========================================================
-    // CONTROLLER
-    // =========================================================
 
     pll_controller u_controller (
 
