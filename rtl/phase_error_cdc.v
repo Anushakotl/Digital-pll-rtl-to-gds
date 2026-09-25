@@ -14,34 +14,9 @@ module phase_error_cdc (
     output wire       src_busy
 );
 
-    // ============================================================
-    // SOURCE DOMAIN
-    //
-    // The TDC produces an 8-bit phase error and a one-cycle
-    // error_valid pulse.
-    //
-    // We cannot directly send that one-cycle pulse into the slower
-    // control clock domain because the destination may miss it.
-    //
-    // Therefore:
-    //
-    // 1. Hold the phase-error data in a source register.
-    // 2. Toggle req_toggle whenever a new sample is available.
-    // 3. Destination detects the toggle.
-    // 4. Destination captures the stable multi-bit data.
-    // 5. Destination returns acknowledgement.
-    // ============================================================
 
     reg [7:0] src_data_hold;
     reg       req_toggle;
-
-
-    // ============================================================
-    // ACKNOWLEDGEMENT SYNCHRONIZER
-    //
-    // ack_toggle originates in the destination clock domain.
-    // Synchronize it back into src_clk using two flip-flops.
-    // ============================================================
 
     reg ack_sync1;
     reg ack_sync2;
@@ -63,17 +38,8 @@ module phase_error_cdc (
 
     end
 
-
-    // Source is busy until the destination acknowledges the request.
-
     assign src_busy =
         (req_toggle != ack_sync2);
-
-
-    // ============================================================
-    // SOURCE DATA CAPTURE
-    // ============================================================
-
     always @(posedge src_clk or negedge reset_n) begin
 
         if (!reset_n) begin
@@ -97,15 +63,6 @@ module phase_error_cdc (
 
     end
 
-
-    // ============================================================
-    // REQUEST SYNCHRONIZER
-    //
-    // req_toggle originates in the 200 MHz TDC domain.
-    //
-    // Synchronize it into the control domain.
-    // ============================================================
-
     (* ASYNC_REG = "TRUE" *) reg req_sync1;
     (* ASYNC_REG = "TRUE" *) reg req_sync2;
 
@@ -127,19 +84,6 @@ module phase_error_cdc (
         end
 
     end
-
-
-    // ============================================================
-    // DESTINATION DOMAIN
-    //
-    // When req_sync2 differs from ack_toggle, a new phase-error
-    // sample is waiting.
-    //
-    // src_data_hold has been held stable throughout the request
-    // synchronization interval.
-    //
-    // Capture it and generate a one-cycle dst_valid pulse.
-    // ============================================================
 
     always @(posedge dst_clk or negedge reset_n) begin
 
