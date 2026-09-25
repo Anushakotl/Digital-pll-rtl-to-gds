@@ -2,11 +2,7 @@
 
 module frequency_detector #(
 
-    // 400 cycles of 200 MHz = 2 us observation window.
-    //
-    // At 10 MHz:
-    // around 20 reference edges occur in this window.
-    //
+
     parameter WINDOW_CYCLES = 16'd400
 
 )(
@@ -18,18 +14,7 @@ module frequency_detector #(
     input  wire             ref_clk,
     input  wire             feedback_clk,
 
-    // Positive:
-    // feedback frequency is too LOW
-    // -> VCO should speed up
-    //
-    // Negative:
-    // feedback frequency is too HIGH
-    // -> VCO should slow down
-
     output reg signed [7:0] freq_error,
-
-    // One tdc_clk-cycle pulse when a new
-    // frequency measurement is available.
 
     output reg              freq_valid
 );
@@ -214,17 +199,6 @@ module frequency_detector #(
                             fb_count_final + 9'd1;
 
 
-                    // -----------------------------------------
-                    // Frequency error:
-                    //
-                    // positive:
-                    // reference had more edges
-                    // -> feedback too slow
-                    //
-                    // negative:
-                    // feedback had more edges
-                    // -> feedback too fast
-                    // -----------------------------------------
 
                     error_temp =
                         $signed({
