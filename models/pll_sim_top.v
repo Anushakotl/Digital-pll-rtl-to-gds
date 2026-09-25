@@ -55,18 +55,7 @@ module pll_sim_top (
     output wire                    loop_enable
 );
 
-
-    // =========================================================
     // BEHAVIORAL VCO
-    // =========================================================
-    //
-    // This block is SIMULATION ONLY.
-    //
-    // tuning_word controls the modeled VCO frequency.
-    //
-    // The resulting vco_clk is fed back through the divider
-    // into the phase/frequency detector.
-    // =========================================================
 
     behavioral_vco u_vco (
 
@@ -79,21 +68,9 @@ module pll_sim_top (
     );
 
 
-    // =========================================================
+
     // DIGITAL PLL SUBSYSTEM
-    // =========================================================
-    //
-    // Clock domains:
-    //
-    // ref_clk  -> PFD reference
-    //
-    // tdc_clk  -> 200 MHz phase-error measurement domain
-    //
-    // ctrl_clk -> 50 MHz controller / lock detector /
-    //             PI loop-filter domain
-    //
-    // vco_clk  -> feedback-divider domain
-    // =========================================================
+
 
     pll_digital_top u_digital (
 
