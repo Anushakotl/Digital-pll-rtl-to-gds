@@ -1,0 +1,35 @@
+# Simulation executables
+sim/*_sim
+sim/*_check
+sim/*.out
+
+# Intermediate simulation logs
+sim/*.log
+
+# Large waveform dumps
+waveforms/*.vcd
+
+# Historical synthesis logs
+synthesis/*.log
+
+# EDA intermediate databases
+*.odb
+*.db
+*.lvsdb
+*.lyrdb
+
+# Temporary/debug files
+*.tmp
+*.bak
+*.jou
+*.history
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store

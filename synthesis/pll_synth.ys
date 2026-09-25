@@ -1,0 +1,27 @@
+read_verilog rtl/pfd.v
+read_verilog rtl/phase_error_tdc.v
+read_verilog rtl/phase_error_cdc.v
+read_verilog rtl/frequency_detector.v
+read_verilog rtl/frequency_acquisition.v
+read_verilog rtl/pi_loop_filter.v
+read_verilog rtl/feedback_divider.v
+read_verilog rtl/lock_detector.v
+read_verilog rtl/pll_controller.v
+read_verilog rtl/pll_digital_top.v
+
+hierarchy -check -top pll_digital_top
+
+proc
+opt
+fsm
+opt
+memory
+opt
+
+check
+
+synth -top pll_digital_top
+
+stat
+
+write_verilog -noattr synthesis/pll_digital_netlist.v
