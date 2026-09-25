@@ -351,21 +351,6 @@ module pi_loop_filter (
 
         end
 
-
-        // -----------------------------------------------------
-        // COARSE -> FINE HANDOFF
-        //
-        // Example:
-        //
-        // coarse tuning = 608
-        //
-        // PI integrator becomes:
-        //
-        // (608*16) - (512*16)
-        //
-        // so PI output begins exactly at 608.
-        // -----------------------------------------------------
-
         else if (load_tuning) begin
 
             tuning_word <=
