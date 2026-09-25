@@ -2,28 +2,6 @@
 
 module lock_detector #(
 
-    // =========================================================
-    // LOCK QUALIFICATION PARAMETERS
-    // =========================================================
-    //
-    // To ENTER lock:
-    //
-    //   |phase_error| <= LOCK_THRESHOLD
-    //
-    // AND
-    //
-    //   |phase_error[n] - phase_error[n-4]|
-    //        <= DRIFT_THRESHOLD
-    //
-    // for LOCK_COUNT_REQUIRED consecutive valid samples.
-    //
-    // To LEAVE lock:
-    //
-    //   |phase_error| >= LOSS_THRESHOLD
-    //
-    // for LOSS_COUNT_REQUIRED consecutive valid samples.
-    // =========================================================
-
     parameter [8:0] LOCK_THRESHOLD       = 9'd4,
     parameter [8:0] DRIFT_THRESHOLD      = 9'd2,
 
@@ -34,10 +12,6 @@ module lock_detector #(
 
 )(
 
-    // NOTE:
-    //
-    // This port retains the original name tdc_clk.
-    // In pll_digital_top it is connected to ctrl_clk = 50 MHz.
 
     input  wire       tdc_clk,
     input  wire       reset_n,
@@ -62,9 +36,6 @@ module lock_detector #(
     // =========================================================
     // ABSOLUTE CURRENT PHASE ERROR
     // =========================================================
-    //
-    // Extend to 9 bits first so -128 can safely become +128.
-    // =========================================================
 
     wire signed [8:0] phase_error_ext;
     wire        [8:0] abs_error;
@@ -76,24 +47,8 @@ module lock_detector #(
         phase_error_ext[8] ?
         -phase_error_ext :
          phase_error_ext;
-
-
-    // =========================================================
+   
     // PHASE-ERROR HISTORY
-    // =========================================================
-    //
-    // Store the last four VALID phase-error measurements.
-    //
-    // delay_4 contains the phase error from four valid
-    // measurements earlier.
-    //
-    // This allows us to estimate whether phase is still
-    // drifting with time.
-    //
-    // If phase keeps drifting, a frequency mismatch still
-    // exists even if phase_error happens to pass near zero.
-    // =========================================================
-
     reg [7:0] phase_delay_1;
     reg [7:0] phase_delay_2;
     reg [7:0] phase_delay_3;
@@ -101,30 +56,7 @@ module lock_detector #(
 
     reg [2:0] history_count;
 
-
-    // =========================================================
     // PHASE DRIFT CALCULATION
-    // =========================================================
-    //
-    // drift =
-    //
-    //     current phase error
-    //              -
-    //     phase error four valid samples ago
-    //
-    // Example:
-    //
-    // current = +2
-    // old     = +1
-    //
-    // drift   = +1       -> good
-    //
-    //
-    // current = -2
-    // old     = +3
-    //
-    // drift   = -5       -> still moving too quickly
-    // =========================================================
 
     wire signed [7:0] phase_delay_4_s;
 
@@ -212,9 +144,6 @@ module lock_detector #(
             phase_delay_2 <= phase_delay_1;
             phase_delay_1 <= phase_error;
 
-
-            // Fill the four-sample history first.
-
             if (history_count < 3'd4)
                 history_count <= history_count + 3'd1;
 
@@ -227,23 +156,7 @@ module lock_detector #(
 
                 loss_count <= 8'd0;
 
-
-                // ---------------------------------------------
-                // We cannot evaluate phase drift until four
-                // previous valid samples have been collected.
-                // ---------------------------------------------
-
                 if (history_count >= 3'd4) begin
-
-
-                    // -----------------------------------------
-                    // TRUE LOCK CANDIDATE:
-                    //
-                    // 1. Phase error is small.
-                    //
-                    // 2. Phase error is not significantly
-                    //    drifting with time.
-                    // -----------------------------------------
 
                     if ((abs_error <= LOCK_THRESHOLD) &&
                         (abs_drift <= DRIFT_THRESHOLD)) begin
@@ -270,9 +183,6 @@ module lock_detector #(
 
                     else begin
 
-                        // A bad phase or drift measurement
-                        // breaks the consecutive lock sequence.
-
                         lock_count <= 8'd0;
 
                     end
@@ -281,8 +191,6 @@ module lock_detector #(
 
 
                 else begin
-
-                    // Still filling history.
 
                     lock_count <= 8'd0;
 
@@ -298,19 +206,6 @@ module lock_detector #(
             else begin
 
                 lock_count <= 8'd0;
-
-
-                // ---------------------------------------------
-                // LOSS-OF-LOCK QUALIFICATION
-                //
-                // Once locked, tolerate normal small phase
-                // movement.
-                //
-                // Only declare loss when phase error becomes
-                // significantly large for several consecutive
-                // valid measurements.
-                // ---------------------------------------------
-
                 if (abs_error >= LOSS_THRESHOLD) begin
 
 
